@@ -1,0 +1,16 @@
+name: investigation-influence-industry
+channels:
+- conda-forge
+- anaconda
+- defaults
+dependencies:
+- python=3.11
+- pandas
+- matplotlib
+- jupyter
+- python-dotenv
+# - jupyter_contrib_nbextensions
+- pip
+- pip:
+  - TikTokApi
+  - playwright

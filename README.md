@@ -27,3 +27,9 @@ And copy the Jupyter Notebook start up url e.g. http://localhost:8889/?token=b53
 Create a .env file and add `ms_token` from cookies to it
 
 'source .env'
+
+Run the Python file:
+
+`python ./src/TikTok.py`
+
+

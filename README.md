@@ -28,8 +28,23 @@ Create a .env file and add `ms_token` from cookies to it
 
 'source .env'
 
+## Retrieve the original 
+
 Run the Python file:
 
 `python ./src/TikTok.py`
 
+## Analyse the data with the Jupyter Notebook
 
+The Notebook 
+
+- extract and clean the data
+- translate from Italian to English
+- download resources like cover images and videos
+- do OCR text extraction on cover images 
+  
+Run some basic analytics including:
+
+- how often and when did Meloni post?
+- which posts were the most liked and shared
+- what were the most common words used

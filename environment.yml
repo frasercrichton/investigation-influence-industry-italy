@@ -9,11 +9,10 @@ dependencies:
 - matplotlib
 - jupyter
 - python-dotenv
-
-# - jupyter_contrib_nbextensions
 - pip
 - pip:
   - TikTokApi
   - playwright
   - tiktok-hashtag-analysis
   - deep-translator
+  - yt_dlp

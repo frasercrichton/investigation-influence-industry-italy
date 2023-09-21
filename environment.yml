@@ -17,3 +17,7 @@ dependencies:
   - tiktok-hashtag-analysis
   - deep-translator
   - yt_dlp
+  - urllib3
+  - awscli
+  - botocore
+  - boto3

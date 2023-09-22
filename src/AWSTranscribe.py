@@ -14,6 +14,23 @@ config = dotenv_values(".env")
 
 logger = logging.getLogger(__name__)
 
+class Bucket:
+
+    def __init__(self):
+        self.s3_resource = boto3.resource('s3')
+        self.s3_client = boto3.client('s3')
+       
+    def get_list_of_objects(self, bucket_name):
+        s3_object_list = []
+        for s3_object in self.s3_client.list_objects(Bucket=bucket_name)['Contents']:
+            file_name = s3_object['Key']
+            s3_object_url = f'https://{bucket_name}.s3.amazonaws.com/{file_name}'
+            s3_object_list.append(s3_object_url)
+        
+        print(f'Number of objects in bucket: {len(s3_object_list)}')
+        return s3_object_list
+
+
 class Transcription:
     
     def __init__(self):
@@ -51,6 +68,10 @@ class Transcription:
                 job_args['Settings'] = {'VocabularyName': vocabulary_name}
             response = self.transcribe_client.start_transcription_job(**job_args)
             job = response['TranscriptionJob']
+            
+            if job['TranscriptionJobStatus'] == 'FAILED':
+                logger.exception("Transcription job failed %s.", job_name)
+                raise
             logger.info("Started transcription job %s.", job_name)
         except ClientError:
             logger.exception("Couldn't start transcription job %s.", job_name)
@@ -58,14 +79,18 @@ class Transcription:
         else:
             return job
     
-    def transcribe_bucket_contents(self, bucket_name : str ):
-        for s3_object in self.s3_client.list_objects(Bucket=bucket_name)['Contents']:
-            file_name = s3_object['Key']
-            file_id = os.path.splitext(file_name)[0]
-            s3_object_url = f'https://{bucket_name}.s3.amazonaws.com/{file_name}'
-            print(s3_object_url)
+    def transcribe_bucket_contents(self, bucket_name: str, previous_job_list: str ):
+        bucket = Bucket()
+        s3_objects = bucket.get_list_of_objects(bucket_name=bucket_name)
+        for file_name in s3_objects:
+            bucket_url = f'https://{bucket_name}.s3.amazonaws.com/'
+            file_id = file_name.removeprefix(bucket_url).removesuffix('.mp3')
             
-            self.start_job(job_name=f'TranscribeTikTokAudio{file_id}', media_uri= s3_object_url, media_format='mp3', language_code='it-IT', transcribe_client=transcribe_client, vocabulary_name=None)
+            if file_id in previous_job_list:             
+                print(f'Already Processed: {file_name}')
+            elif file_id not in previous_job_list:
+                print(f'Queueing: {file_name}')
+                self.start_job(job_name=f'TranscribeTikTokAudio{file_id}', media_uri= file_name, media_format='mp3', language_code='it-IT', transcribe_client=self.transcribe_client, vocabulary_name=None)
 
     def get_job_list(self, status: str, job_name_contains: str, max_results: str):
           # 'QUEUED'|'IN_PROGRESS'|'FAILED'|'COMPLETED'
@@ -76,8 +101,7 @@ class Transcription:
             JobNameContains=job_name_contains,
             MaxResults=max_results)
         transcription_job_summaries = response['TranscriptionJobSummaries']
-        
-        # TranscriptionJobSummaries
+        print(f'transcription_job_summaries: {len(transcription_job_summaries)}')
         # if there are more results "NextToken" is present so page forward 
         while ("NextToken" in response):
             next_token = response['NextToken']
@@ -86,11 +110,13 @@ class Transcription:
                 JobNameContains=job_name_contains,
                 NextToken=next_token,
             MaxResults=max_results)        
-            transcription_job_summaries.append(response['TranscriptionJobSummaries'])
-        # print(transcription_job_summaries)    
-        # df = pd.DataFrame(transcription_job_summaries)
-        # df.to_json(f'./debug.json')
-
+            next_transcription_job_summaries = response['TranscriptionJobSummaries']
+            print(f'Next Page of transcription_job_summaries: { len(next_transcription_job_summaries)}')
+            transcription_job_summaries.extend(response['TranscriptionJobSummaries'])
+            print(f'Number of jobs after Next Page: {len(transcription_job_summaries)}')
+        
+        print(f'Number of previously completed jobs: {len(transcription_job_summaries)}')    
+        
         return transcription_job_summaries
     
     def get_transcription_job(self, job_name: str):
@@ -99,15 +125,23 @@ class Transcription:
     def download_transcript(self, job_id: str):
         transcription_job = transcription.get_transcription_job(job_id)
         uri = transcription_job['TranscriptionJob']['Transcript']['TranscriptFileUri']
-
+        print(f'Downloading: {job_id}' )
         df = pd.read_json(uri)
         df.to_json(f'./data/processed/transcription/original/{job_id}.json')
 
 if __name__ == "__main__":
-    bucket_name = 'frasercrichton-com-audio-transcription'
     transcription = Transcription()
-    
     transcription_results = transcription.get_job_list(status='COMPLETED', job_name_contains = 'TranscribeTikTokAudio', max_results = 100) 
-    print(len(transcription_results))    
+    previous_job_ids = []
+    
+    for result in transcription_results:
+        previous_job_ids.append(result['TranscriptionJobName'].removeprefix('TranscribeTikTokAudio'))
+
+    bucket_name = 'frasercrichton-com-audio-transcription'
+    bucket = Bucket()
+    s3_list_of_objects = bucket.get_list_of_objects(bucket_name=bucket_name)    
+       
+    transcription.transcribe_bucket_contents(bucket_name=bucket_name, previous_job_list=previous_job_ids)
+
     for job in transcription_results:
         transcription.download_transcript(job['TranscriptionJobName'])

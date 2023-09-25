@@ -86,27 +86,25 @@ async def user_example(name, video_count):
         user_data = await user.info()
         print(user_data)
         df = pd.DataFrame.from_dict(user_data)
-        df.to_csv('./data/source/user-2023-09-14.csv')
+        df.to_csv('./data/source/user-2023-09-22.csv')
         
-        data = []
-        async for video in user.videos(count=video_count):
-            data.append(video.as_dict)
+        # data = []
+        # async for video in user.videos(count=video_count):
+        #     data.append(video.as_dict)
         
-        df = pd.DataFrame.from_dict(data)
-        print(df)
-        df.to_json('./data/source/video-2023-09-14.json')
-        df.to_json('./data/source/video-2023-09-14.csv')
+        # df = pd.DataFrame.from_dict(data)
+        # print(df)
+        # df.to_json('./data/source/video-2023-09-14.json')
+        # df.to_json('./data/source/video-2023-09-14.csv')
 
+        likes = api.user(username=name).liked()
+        likes_df = pd.DataFrame.from_dict(likes)
+        print(likes_df)
+        likes_df.to_json('./data/source/likes.json')
+     
 if __name__ == "__main__":
-    # bucket = s3_resource.Bucket(f'doc-example-bucket-{uuid.uuid4()}')
 
-    conn = client('s3')  # again assumes boto.cfg setup, assume AWS S3
-    for key in conn.list_objects(Bucket='frasercrichton-com-audio-transcription')['Contents']:
-        print(key['Key'])
-    # hello_s3()
-    # start_job(job_name, media_uri, media_format, language_code, transcribe_client, vocabulary_name=None)
-    
-    # asyncio.run(user_example(name='giorgiameloni_ufficiale', video_count=400))
+    asyncio.run(user_example(name='giorgiameloni_ufficiale', video_count=400))
     # asyncio.run(download_video(id='x345', output_name='x.mp4'))
 
     

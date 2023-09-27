@@ -104,6 +104,8 @@ async def user_example(name, video_count):
      
 if __name__ == "__main__":
 
+    user_name = 'giorgiameloni_ufficiale'
+    
     asyncio.run(user_example(name='giorgiameloni_ufficiale', video_count=400))
     # asyncio.run(download_video(id='x345', output_name='x.mp4'))
 

@@ -22,4 +22,8 @@ dependencies:
   - botocore
   - boto3
   - opencv-python
+  - wordcloud
+  - bertopic
+  - scikit-learn
+  - 'bertopic[spacy]'
 

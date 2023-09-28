@@ -26,4 +26,6 @@ dependencies:
   - bertopic
   - scikit-learn
   - 'bertopic[spacy]'
+  - keybert
+  - nltk
 

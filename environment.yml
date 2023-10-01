@@ -11,6 +11,9 @@ dependencies:
 - python-dotenv
 - pip
 - moviepy
+- openai
+- spacy
+- mscorefonts
 - pip:
   - TikTokApi
   - playwright
@@ -28,4 +31,5 @@ dependencies:
   - 'bertopic[spacy]'
   - keybert
   - nltk
+  - numpy==1.23.5
 

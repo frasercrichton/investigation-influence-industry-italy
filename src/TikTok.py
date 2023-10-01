@@ -18,41 +18,6 @@ ms_token = config["ms_token"]
 
 logger = logging.getLogger(__name__)
 
-    # async with TikTokApi() as api:
-    #     await api.create_sessions(ms_tokens=[ms_token], num_sessions=1, sleep_after=3)
-
-    #     await api.video(id='7041997751718137094').bytes()
-
-    #     # Saving The Video
-    #     with open('saved_video.mp4', 'wb') as output:
-    #         output.write(video_bytes)
-
-    #     async for related_video in video.related_videos(count=10):
-    #         print(related_video)
-    #         print(related_video.as_dict)
-
-async def user_example():    
-    async with TikTokApi() as api:
-        await api.create_sessions(ms_tokens=[ms_token], num_sessions=1, sleep_after=3)
-        video = api.video(
-            url="https://www.tiktok.com/@davidteathercodes/video/7074717081563942186"
-        )
-
-    
-        video_bytes = api.video(id='7041997751718137094').bytes()
-        print(video_bytes)
-        # Saving The Video
-        with open('saved_video.mp4', 'wb') as output:
-            output.write(video_bytes)
-
-        # async for related_video in video.related_videos(count=10):
-        #     print(related_video)
-        #     print(related_video.as_dict)
-
-        # video_info = await video.info()  # is HTML request, so avoid using this too much
-        # print(video_info)
-
-
 async def get_hashtag_videos(name=None, id=None):
     async with TikTokApi(logging_level=logging.DEBUG) as api:
         await api.create_sessions(ms_tokens=[ms_token], num_sessions=1, sleep_after=3)
@@ -67,50 +32,34 @@ async def get_hashtag_videos(name=None, id=None):
             df = pd.DataFrame.from_dict(video.as_dict)
             df.to_csv('./hashtag.csv')
 
-async def trending_videos():
-    print("start")
-    async with TikTokApi() as api:
-        print("about to")
-        await api.create_sessions(ms_tokens=[ms_token], num_sessions=1, sleep_after=3)
-        print("awaiting", api.trending.videos(count=30))
-        async for video in api.trending.videos(count=30):
-            print(video)
-            print(video.as_dict)
-
 videos_df = pd.DataFrame()
 
-async def user_example(name, video_count):
+async def get_user_data(user_name, video_count=0):
     async with TikTokApi() as api:
         await api.create_sessions(ms_tokens=[ms_token], num_sessions=1, sleep_after=3)
-        user = api.user(name)
+        user = api.user(user_name)
         user_data = await user.info()
         print(user_data)
         df = pd.DataFrame.from_dict(user_data)
-        df.to_csv('./data/source/user-2023-09-22.csv')
+        df.to_csv('./data/source/user-2023-09-22.json')
         
-        # data = []
-        # async for video in user.videos(count=video_count):
-        #     data.append(video.as_dict)
+        if (video_count != 0):
+            print('getting videos')
         
         # df = pd.DataFrame.from_dict(data)
         # print(df)
         # df.to_json('./data/source/video-2023-09-14.json')
-        # df.to_json('./data/source/video-2023-09-14.csv')
 
-        likes = api.user(username=name).liked()
+        likes = api.user(username=user_name).liked()
         likes_df = pd.DataFrame.from_dict(likes)
         print(likes_df)
         likes_df.to_json('./data/source/likes.json')
      
 if __name__ == "__main__":
-
     user_name = 'giorgiameloni_ufficiale'
     
-    asyncio.run(user_example(name='giorgiameloni_ufficiale', video_count=400))
-    # asyncio.run(download_video(id='x345', output_name='x.mp4'))
-
-    
-
+    # , video_count=400
+    asyncio.run(get_user_data(user_name=user_name))
     # asyncio.run(get_hashtag_videos(name='meloni'))
     # asyncio.run(get_hashtag_videos(name='Glastonbury'))
     # asyncio.run(user_example())

@@ -11,6 +11,7 @@ import yt_dlp
 from yt_dlp.utils import ExtractorError, DownloadError
 
 ms_token = config["ms_token"]
+# os.makedirs(transcription_dir_location + 'original', exist_ok = True)
 
 
 # warnings.filterwarnings("ignore", message="Glyph (.*) missing from current font")

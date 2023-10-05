@@ -14,6 +14,7 @@ dependencies:
 - openai
 - spacy
 - mscorefonts
+- gensim
 - pip:
   - TikTokApi
   - playwright

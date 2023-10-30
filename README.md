@@ -1,4 +1,4 @@
-# Investigation-Influence-Industry
+# Investigation Influence Industry
 
 ## Install and Setup
 
@@ -16,27 +16,43 @@ Updates to Python Package
 
 ## Prerequisite 
 
-Create a .env file and add `ms_token` from cookies to it and then run:
+Create a .env file and add:
+
+* `ms_token` - from TikTok cookies to it for the TikTok-API (see: )
+* 'openai_api_key' - add this if you are using BertTopics Open AI topic representation model.
+
+and then run:
 
 'source .env'
 
-## Retrieve the original
+## Python Scripts
+
+### Download original TikTok Posts
+
+This calls the TikTok-API framework to download posts. For more info see: 
 
 Run the Python file:
 
 `python ./src/DownloadTikTokPosts.py`
 
-## Analyse the data with the Jupyter Notebook
+### AWS Transcribe
 
-The Notebook 
+This script initiates the transcription of the files in S3. Once the transcription jobs are complete the transcription text is downloaded to the `data/processed/transcription` folder.
 
-- extract and clean the data
-- translate from Italian to English
-- download resources like cover images and videos
-- do OCR text extraction on cover images 
-  
-Run some basic analytics including:
+Prerequisite - the AWS CLI and a public/private key setup to authenticate with the AWS account, all the audio to be transcribed should be uploaded to an S3 Bucket in AWS.
 
-- how often and when did Meloni post?
-- which posts were the most liked and shared
-- what were the most common words used
+Run this:
+
+`python ./src/AWSTranscribe.py`
+
+
+## Jupyter Notebooks
+
+
+### Download Videos
+
+### Clean
+
+### Analyse 
+
+These Notebooks are self explanatory.

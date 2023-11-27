@@ -45,14 +45,6 @@ Run this:
 
 `python ./src/AWSTranscribe.py`
 
-
-## Jupyter Notebooks
-
-
-### Download Videos
-
-### Clean
-
 ### Analyse 
 
-These Notebooks are self explanatory.
+These Jupyter Notebooks  are self explanatory.
